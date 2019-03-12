@@ -6,8 +6,8 @@ Running platform: Windows 10
 ## How to run the jar files
 As a user open cmd to run jar file, he or she needs to open server jar first, enter command as java -jar [FilePath] to open server jar.Then user can run client jar, and the command is java -jar [FilePath] [IP number] [Port],because server default work in port 20666, so [port] is 20666 and IP number is server's IP number.
 
-For example: 
-java -jar ChatServer.jar
+For example: <br/>
+java -jar ChatServer.jar<br/>
 java -jar Client.jar 127.0.0.1 20666
 
 ## Functions
