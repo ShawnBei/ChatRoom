@@ -28,7 +28,10 @@ public class ServerThread extends Thread {
 		try {
 			boolean flag = true;
 			BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
 			while (flag) {
+
+				//after connection, user can either login or register
 				command = in.readLine();
 				if (command.equals("#LOGIN")) {
 					login();
@@ -47,11 +50,14 @@ public class ServerThread extends Thread {
 		try {
 			PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 			BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+			//client will send 4 lines information
 			username = in.readLine();
 			password = in.readLine();
 			nickname = in.readLine();
 			gender = in.readLine();
 
+			//check if the user had been registered, if not then register a new account in database
 			Statement st = conn.createStatement();
 			query = "SELECT * FROM USERS WHERE USERNAME = '" + username + "';";
 			ResultSet rs = st.executeQuery(query);
@@ -64,13 +70,13 @@ public class ServerThread extends Thread {
 				out.println("#REGISTERSUCCESS");
 				System.out.println(username + " register success");
 
-				// update file folder
+				//update file folder
 				updateFolders(username);
 
-				// add to user list
+				//update alluser list
 				allUsers.getUserList().add(username);
 
-				// update online users' user list
+				//update online user list
 				letOtherPeopleKnowIAmOff();
 			}
 		} catch (Exception e) {
@@ -88,9 +94,11 @@ public class ServerThread extends Thread {
 			query = "SELECT * FROM USERS WHERE userName = '" + username + "';";
 			ResultSet rs = st.executeQuery(query);
 
-			// if user exists
-			if (rs.next()) {
-				if (BCrypt.checkpw(password, rs.getString("password"))) {
+			//check whether user exists
+			if (rs.next()) { //user exists
+
+				//check passwords
+				if (BCrypt.checkpw(password, rs.getString("password"))) { //passwords match
 					query = "UPDATE USERS SET STATUS='TRUE' WHERE USERNAME='" + username + "';";
 					st.executeUpdate(query);
 					out.println("#LOGINSUCCESS");
@@ -125,7 +133,7 @@ public class ServerThread extends Thread {
 					// if user leave main page
 					inputLine = in.readLine();
 					while (inputLine != null) {
-						if (inputLine.equals("#QUIT")) {
+						if (inputLine.equals("#QUIT")) { //quit program
 
 							// remove user from online user list
 							onlineUsers.removeUser(newUser);
@@ -138,11 +146,11 @@ public class ServerThread extends Thread {
 							pct.join();
 							System.out.println(username + " exits");
 							break;
-						}
-						else if (inputLine.startsWith("#G")) {
+						} 
+						else if (inputLine.startsWith("#G")) { //group chat
 							gct.getInputString(inputLine);
 						}
-						else if (inputLine.startsWith("#P")) {
+						else if (inputLine.startsWith("#P")) { //pair chat
 							pct.getInputString(inputLine);
 						}
 						/*else {
@@ -151,13 +159,13 @@ public class ServerThread extends Thread {
 							pw.println(inputLine);
 							pw.flush();
 							}*/
-						inputLine = in.readLine();
+						inputLine = in.readLine(); //keep listen for new messages
 					}
-				} else {
+				} else { //passwords do not match
 					out.println("#WRONGPASSWORD");
 					System.out.println(username + " login fail: wrong password");
 				}
-			} else {
+			} else { //user does not exist
 				out.println("#NOUSER");
 				System.out.println(username + " login fail: not exist");
 			}
